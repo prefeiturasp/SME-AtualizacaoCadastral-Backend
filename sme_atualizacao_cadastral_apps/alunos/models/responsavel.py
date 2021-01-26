@@ -119,13 +119,13 @@ class Responsavel(ModeloBase):
             if self.status == 'DIVERGENTE':
                 log.info(f'Enviando email divergencia para: {self.email}.')
                 enviar_email_solicitacao_uniforme.delay(
-                    'Divergência nos dados informados', 'email_divergencia_cpf', self.email, {'nome': nome_aluno,
-                                                                                              'id': self.id})
+                    'Problema na atualização de seu cadastro na Secretaria Municipal de Educação',
+                    'email_divergencia_cpf', self.email, {'nome': nome_aluno, 'id': self.id})
             else:
                 log.info(f'Enviando email confirmação para: {self.email}.')
                 enviar_email_solicitacao_uniforme.delay(
-                    'Obrigado por solicitar o uniforme escolar', 'email_confirmacao_pedido', self.email,
-                    {'nome': nome_aluno, 'id': self.id})
+                    'Obrigada por fazer a atualização de seu cadastro na Secretaria Municipal de Educação',
+                    'email_confirmacao_pedido', self.email, {'nome': nome_aluno, 'id': self.id})
         else:
             log.info('Não possui e-mail para envio')
 
