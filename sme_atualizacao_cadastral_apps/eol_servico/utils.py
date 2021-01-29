@@ -44,6 +44,19 @@ class EOLService(object):
     DEFAULT_TIMEOUT = 20
 
     @classmethod
+    def tem_informacao_faltando(cls, dados_responsavel):
+
+        return not (
+            not dados_responsavel['nm_responsavel']
+            or not dados_responsavel['dc_tipo_responsavel']
+            or not dados_responsavel['cd_cpf_responsavel']
+            or not dados_responsavel['nr_celular_responsavel']
+            or not dados_responsavel['email_responsavel']
+            or not dados_responsavel['nm_mae_responsavel']
+            or not dados_responsavel['dt_nascimento_responsavel']
+        )
+
+    @classmethod
     def get_informacoes_responsavel(cls, codigo_eol):
         log.info(f"Buscando informações do responsável do eol: {codigo_eol}")
         if aluno_existe(codigo_eol):
@@ -58,7 +71,10 @@ class EOLService(object):
             if response.status_code == status.HTTP_200_OK:
                 results = response.json()['results']
                 if len(results) == 1:
-                    return results[0]
+                    dados_responsavel = results[0]['responsaveis'][0]
+                    if not cls.tem_informacao_faltando(dados_responsavel):
+                        return results[0]
+                    raise EOLException('Os dados do responsável já estão completos no EOL.')
                 raise EOLException(f'Resultados para o código: {codigo_eol} vazios')
             else:
                 raise EOLException(f'Código EOL não existe')
