@@ -11,7 +11,7 @@ import datetime
 
 class DadosResponsavelEOLViewSet(ViewSet):
     lookup_field = 'codigo_eol'
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     many = False
 
     @action(detail=False, methods=['post'])
@@ -30,7 +30,7 @@ class DadosResponsavelEOLViewSet(ViewSet):
             else:
                 data_nascimento_eol = datetime.datetime.strptime(dados['dt_nascimento_aluno'], "%Y-%m-%dT%H:%M:%S")
                 if data_nascimento_request.date() == data_nascimento_eol.date():
-                    if dados['recebe_uniforme'] == 'S' and dados['recadastra'] == 'S':
+                    if dados['recadastra'] == 'S':
                         EOLService.registra_log(codigo_eol=codigo_eol, json=dados)
                         if dados['responsaveis']:
                             if not request.user.codigo_escola:
