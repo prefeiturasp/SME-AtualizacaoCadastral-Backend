@@ -12,6 +12,8 @@ class ResponsavelSerializer(serializers.ModelSerializer):
     cd_ddd_celular_responsavel = serializers.CharField(source='ddd_celular', required=False, allow_null=True)
     nr_celular_responsavel = serializers.CharField(source='celular', validators=[validators.phone_validation],
                                                    required=False, allow_null=True)
+    nm_mae_responsavel = serializers.CharField(source='nome_mae')
+    dt_nascimento_responsavel = serializers.DateField(source='data_nascimento')
     email_responsavel = serializers.CharField(source='email', validators=[validators.email_validation], required=False,
                                               allow_null=True)
     retornos = RetornoMPSerializer(many=True, required=False)
@@ -20,8 +22,8 @@ class ResponsavelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Responsavel
         fields = ('codigo_eol_aluno', 'nm_responsavel', 'cd_cpf_responsavel', 'cd_ddd_celular_responsavel',
-                  'nr_celular_responsavel', 'email_responsavel', 'tp_pessoa_responsavel', 'nome_mae',
-                  'data_nascimento', 'status', 'nao_possui_celular', 'nao_possui_email', 'enviado_para_mercado_pago',
+                  'nr_celular_responsavel', 'email_responsavel', 'tp_pessoa_responsavel', 'nm_mae_responsavel',
+                  'dt_nascimento_responsavel', 'status', 'nao_possui_celular', 'nao_possui_email', 'enviado_para_mercado_pago',
                   'retornos', 'aceita_divergencia')
 
 
