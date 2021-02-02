@@ -46,7 +46,7 @@ class EOLService(object):
     @classmethod
     def tem_informacao_faltando(cls, dados_responsavel):
 
-        return not (
+        return (
             not dados_responsavel['nm_responsavel']
             or not dados_responsavel['dc_tipo_responsavel']
             or not dados_responsavel['cd_cpf_responsavel']
@@ -71,10 +71,7 @@ class EOLService(object):
             if response.status_code == status.HTTP_200_OK:
                 results = response.json()['results']
                 if len(results) == 1:
-                    dados_responsavel = results[0]['responsaveis'][0]
-                    if not cls.tem_informacao_faltando(dados_responsavel):
-                        return results[0]
-                    raise EOLException('Os dados do responsável já estão completos no EOL.')
+                    return results[0]
                 raise EOLException(f'Resultados para o código: {codigo_eol} vazios')
             else:
                 raise EOLException(f'Código EOL não existe')
@@ -177,6 +174,10 @@ class EOLService(object):
                                'pela criança, para depois fazer a solicitação do uniforme')
         cpf = ajusta_cpf(dados['responsaveis'][0]['cd_cpf_responsavel'])
         data_nascimento = datetime.datetime.strptime(dados['dt_nascimento_aluno'], "%Y-%m-%dT%H:%M:%S")
+        
+        dados_responsavel = dados['responsaveis'][0]
+        status = "ATUALIZADO_EOL" if not EOLService.tem_informacao_faltando(dados_responsavel) else 'DESATUALIZADO'
+    
         responsavel = Responsavel.objects.create(
             vinculo=dados['responsaveis'][0]['tp_pessoa_responsavel'],
             codigo_eol_aluno=codigo_eol,
@@ -186,7 +187,7 @@ class EOLService(object):
             ddd_celular=dados['responsaveis'][0]['cd_ddd_celular_responsavel'].strip() if dados['responsaveis'][0][
                 'cd_ddd_celular_responsavel'] else None,
             celular=dados['responsaveis'][0]['nr_celular_responsavel'],
-            status='DESATUALIZADO'
+            status=status
         )
         aluno = Aluno.objects.create(
             codigo_eol=codigo_eol,

@@ -169,3 +169,16 @@ class AlunosViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'EOL Timeout'}, status=status.HTTP_400_BAD_REQUEST)
         except ConnectTimeout:
             return Response({'detail': 'EOL Timeout'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['POST'], url_path='atualizado-pela-escola')
+    def atualizado_pela_escola(self, request):
+        codigo_eol = self.request.data.get('codigo_eol', '')
+        try:
+            responsavel = Responsavel.objects.get(codigo_eol_aluno=codigo_eol, status=Responsavel.STATUS_DIVERGENTE)
+            responsavel.status = responsavel.STATUS_ATUALIZADO_EOL
+            responsavel.save()
+            return Response({'detail': 'Informação atualizada com sucesso!'})
+        except Responsavel.DoesNotExist:
+            return Response({'detail': 'Responsavel não encontrado'}, status=status.HTTP_400_BAD_REQUEST)
+        except EOLException as e:
+            return Response({'detail': f'{e}'}, status=status.HTTP_400_BAD_REQUEST)
