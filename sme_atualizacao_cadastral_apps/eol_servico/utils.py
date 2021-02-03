@@ -174,10 +174,10 @@ class EOLService(object):
                                'pela criança, para depois fazer a solicitação do uniforme')
         cpf = ajusta_cpf(dados['responsaveis'][0]['cd_cpf_responsavel'])
         data_nascimento = datetime.datetime.strptime(dados['dt_nascimento_aluno'], "%Y-%m-%dT%H:%M:%S")
-        
+
         dados_responsavel = dados['responsaveis'][0]
         status = "ATUALIZADO_EOL" if not EOLService.tem_informacao_faltando(dados_responsavel) else 'DESATUALIZADO'
-    
+
         responsavel = Responsavel.objects.create(
             vinculo=dados['responsaveis'][0]['tp_pessoa_responsavel'],
             codigo_eol_aluno=codigo_eol,
@@ -234,7 +234,7 @@ class EOLService(object):
                                  auth=HTTPBasicAuth(USUARIO_EOL_API, SENHA_EOL_API),
                                  timeout=cls.DEFAULT_TIMEOUT,
                                  json=payload)
-
+        log.info(f" Resposta da prodan >> {response.content}")
         if response.json() == 'TRUE - ATUALIZACAO EFETUADA COM SUCESSO':
             try:
                 responsavel = Responsavel.objects.get(codigo_eol_aluno=codigo_eol, responsavel_alterado=False)
