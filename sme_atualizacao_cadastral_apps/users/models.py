@@ -29,11 +29,11 @@ class User(SimpleEmailConfirmationUserMixin, AbstractUser, TemChaveExterna):
     def enviar_email_confirmacao(self):
         self.add_email_if_not_exists(self.email)
         content = {'uuid': self.uuid, 'confirmation_key': self.confirmation_key}
-        conteudo = (f'Para confirmar seu e-mail e ativar seu cadastro no ambiente administrativo do Portal do ' +
-                    f'Uniforme, clique neste link: ' +
+        conteudo = (f'Para confirmar seu e-mail e ativar seu cadastro no painel de acompanhamento da atualização cadastral' +
+                    f', clique neste link: ' +
                     f'{url_configs("CONFIRMAR_EMAIL", content)}')
         enviar_email_simples.delay(
-            assunto='Confirme seu e-mail - Ambiente administrativo do Portal do Uniforme',
+            assunto='Confirme seu e-mail - Painel de acompanhamento da atualização cadastral',
             mensagem=conteudo,
             enviar_para=self.email
         )
@@ -43,7 +43,7 @@ class User(SimpleEmailConfirmationUserMixin, AbstractUser, TemChaveExterna):
         token = token_generator.make_token(self)
         content = {'uuid': self.uuid, 'confirmation_key': token}
         titulo = 'Recuperação de senha'
-        conteudo = (f'Clique neste link para criar uma nova senha no ambiente administrativo do Portal do Uniforme: ' +
+        conteudo = (f'Clique neste link para criar uma nova senha no painel de acompanhamento da atualização cadastral: ' +
                     f'{url_configs("RECUPERAR_SENHA", content)}')
         enviar_email_simples.delay(
             assunto=titulo,
