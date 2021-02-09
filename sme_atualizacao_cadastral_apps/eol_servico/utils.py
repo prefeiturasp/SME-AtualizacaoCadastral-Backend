@@ -48,7 +48,7 @@ class EOLService(object):
 
         return (
             not dados_responsavel['nm_responsavel']
-            or not dados_responsavel['dc_tipo_responsavel']
+            or not dados_responsavel['tp_pessoa_responsavel']
             or not dados_responsavel['cd_cpf_responsavel']
             or not dados_responsavel['nr_celular_responsavel']
             or not dados_responsavel['email_responsavel']
