@@ -178,6 +178,10 @@ class EOLService(object):
         dados_responsavel = dados['responsaveis'][0]
         status = "ATUALIZADO_EOL" if not EOLService.tem_informacao_faltando(dados_responsavel) else 'DESATUALIZADO'
 
+        data_nascimento_responsavel = datetime.datetime.strptime(dados['responsaveis'][0][
+                'dt_nascimento_responsavel'].strip(), '%Y-%m-%dT%H:%M:%S') if dados['responsaveis'][0][
+                'dt_nascimento_responsavel']  else None
+
         responsavel = Responsavel.objects.create(
             vinculo=dados['responsaveis'][0]['tp_pessoa_responsavel'],
             codigo_eol_aluno=codigo_eol,
@@ -187,6 +191,9 @@ class EOLService(object):
             ddd_celular=dados['responsaveis'][0]['cd_ddd_celular_responsavel'].strip() if dados['responsaveis'][0][
                 'cd_ddd_celular_responsavel'] else None,
             celular=dados['responsaveis'][0]['nr_celular_responsavel'],
+            nome_mae=dados['responsaveis'][0]['nm_mae_responsavel'].strip() if dados['responsaveis'][0][
+                'nm_mae_responsavel'] else None,
+            data_nascimento=data_nascimento_responsavel,
             status=status
         )
         aluno = Aluno.objects.create(
