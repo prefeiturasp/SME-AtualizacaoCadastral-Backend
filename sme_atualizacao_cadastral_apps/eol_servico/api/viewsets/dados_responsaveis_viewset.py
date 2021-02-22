@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
+from sme_atualizacao_cadastral_apps.alunos.models import Aluno, Responsavel
 from ...utils import EOLException, EOLService, aluno_existe
 import datetime
 
@@ -21,6 +22,9 @@ class DadosResponsavelEOLViewSet(ViewSet):
             dados = EOLService.get_informacoes_responsavel(codigo_eol)
             data_nascimento_request = datetime.datetime.strptime(request.data["data_nascimento"], "%Y-%m-%d")
             if aluno_existe(codigo_eol):
+                aluno = Aluno.objects.get(codigo_eol=codigo_eol)
+                if aluno.responsavel.status == Responsavel.STATUS_ATUALIZADO_EOL:
+                    raise EOLException('Os dados do responsável já estão completos no EOL.')
                 data_nascimento_banco = datetime.datetime.strptime(dados['data_nascimento'], "%Y-%m-%d")
                 if data_nascimento_request.date() == data_nascimento_banco.date():
                     return Response({'detail': dados})
