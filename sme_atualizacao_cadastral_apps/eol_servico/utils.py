@@ -71,6 +71,10 @@ class EOLService(object):
             if response.status_code == status.HTTP_200_OK:
                 results = response.json()['results']
                 if len(results) == 1:
+                    if len(results[0]['responsaveis']) == 1 and results[0]['responsaveis'][0]['dt_nascimento_responsavel']:
+                        data = datetime.datetime.strptime(results[0]['responsaveis'][0]['dt_nascimento_responsavel'], "%Y-%m-%dT%H:%M:%S")
+                        results[0]['responsaveis'][0]['dt_nascimento_responsavel'] = data.strftime("%Y-%m-%d")
+
                     return results[0]
                 raise EOLException(f'Resultados para o código: {codigo_eol} vazios')
             else:
@@ -179,7 +183,7 @@ class EOLService(object):
         status = "ATUALIZADO_EOL" if not EOLService.tem_informacao_faltando(dados_responsavel) else 'DESATUALIZADO'
 
         data_nascimento_responsavel = datetime.datetime.strptime(dados['responsaveis'][0][
-                'dt_nascimento_responsavel'].strip(), '%Y-%m-%dT%H:%M:%S') if dados['responsaveis'][0][
+                'dt_nascimento_responsavel'].strip(), '%Y-%m-%d') if dados['responsaveis'][0][
                 'dt_nascimento_responsavel']  else None
 
         responsavel = Responsavel.objects.create(
