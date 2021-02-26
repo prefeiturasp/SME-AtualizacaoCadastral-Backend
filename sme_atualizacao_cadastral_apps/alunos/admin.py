@@ -6,6 +6,7 @@ from django.contrib.admin import SimpleListFilter
 from .models import (Aluno, Responsavel, LogConsultaEOL, RetornoMP, LogErroAtualizacaoEOL)
 from .forms import LogConsultaEOLForm
 from ..utils.actions import export_as_xls
+from sme_atualizacao_cadastral_apps.eol_servico.tasks import atualizar_nome_mae_data_nascimento_responsavel
 
 
 class AlunoInLine(admin.StackedInline):
@@ -113,6 +114,13 @@ class ResponsavelAdmin(admin.ModelAdmin):
 
     salvar_no_eol.short_description = 'Atualizar Responsaveis na base EOL'
 
+    def atualizar_dados_responsaveis(self, request, _):
+        atualizar_nome_mae_data_nascimento_responsavel.delay()
+        self.message_user(request, "Os dados estão sendo atualizados.")
+    
+    atualizar_dados_responsaveis.short_description = "Atualiza nome da mãe e data nascimento responsável."
+
+
     def get_actions(self, request):
         actions = super().get_actions(request)
         if not request.user.is_superuser:
@@ -125,7 +133,7 @@ class ResponsavelAdmin(admin.ModelAdmin):
     ordering = ('-alterado_em',)
     search_fields = ('uuid', 'cpf', 'nome', 'codigo_eol_aluno')
     list_filter = ('status', TemCelularFilter, TemEmailFilter)
-    actions = ['enviar_emails', 'salvar_no_eol', export_as_xls]
+    actions = ['enviar_emails', 'salvar_no_eol', export_as_xls, 'atualizar_dados_responsaveis']
 
 
 @admin.register(LogConsultaEOL)

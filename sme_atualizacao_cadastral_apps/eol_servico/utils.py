@@ -1,17 +1,18 @@
-import logging
 import datetime
+import logging
 
 import environ
 import requests
-from rest_framework import status
+from django.db.models import Q
 from requests.auth import HTTPBasicAuth
+from rest_framework import status
 
-from ..alunos.models import Aluno, Responsavel, LogErroAtualizacaoEOL
-from ..alunos.models.log_consulta_eol import LogConsultaEOL
 from ..alunos.api.services.aluno_service import AlunoService
-from .helpers import ajusta_cpf
+from ..alunos.models import Aluno, LogErroAtualizacaoEOL, Responsavel
+from ..alunos.models.log_consulta_eol import LogConsultaEOL
 from ..core.constants import ESCOLAS_CEI
 from ..core.utils import remove_accents
+from .helpers import ajusta_cpf
 
 env = environ.Env()
 DJANGO_EOL_API_TOKEN = env('DJANGO_EOL_API_TOKEN')
@@ -272,3 +273,37 @@ class EOLService(object):
                     codigo_escola=results[0]['cd_escola'],
                     codigo_dre=results[0]['cd_dre']
                 )
+    
+    @classmethod
+    def atualiza_dados_responsavel_sem_nome_mae_ou_sem_data_nascimento(cls):
+        log.info('Buscando informações na API EOL.')
+
+        responsaveis = Responsavel.objects.filter(
+            Q(data_nascimento__isnull=True) | 
+            Q(nome_mae__isnull=True) |
+            Q(nome_mae__exact=''))
+
+        log.info(f"Quantidade de responsáveis a serem atualizados {len(responsaveis)}.")
+        for responsavel in responsaveis.all():
+            log.info(f"Atualizando dados do código eol {responsavel.codigo_eol_aluno}.")
+            response = requests.get(f'{DJANGO_EOL_API_URL}/responsaveis/{responsavel.codigo_eol_aluno}',
+                                    headers=cls.DEFAULT_HEADERS,
+                                    timeout=cls.DEFAULT_TIMEOUT)
+            if response.status_code == status.HTTP_200_OK:
+                results = response.json()['results']
+                if len(results) == 1:
+                    if len(results[0]['responsaveis']) == 1 and results[0]['responsaveis'][0]['dt_nascimento_responsavel']:
+                        data = datetime.datetime.strptime(results[0]['responsaveis'][0]['dt_nascimento_responsavel'], "%Y-%m-%dT%H:%M:%S")
+                        results[0]['responsaveis'][0]['dt_nascimento_responsavel'] = data.strftime("%Y-%m-%d")
+                    
+                    data_nascimento_responsavel = datetime.datetime.strptime(results[0]['responsaveis'][0][
+                        'dt_nascimento_responsavel'].strip(), '%Y-%m-%d') if results[0]['responsaveis'][0][
+                        'dt_nascimento_responsavel']  else None
+                    nome_mae = results[0]['responsaveis'][0]['nm_mae_responsavel'].strip() if results[0].get('responsaveis') and results[0]['responsaveis'][0]['nm_mae_responsavel'].strip() else None
+                    responsavel.nome_mae = nome_mae
+                    responsavel.data_nascimento = data_nascimento_responsavel
+                    responsavel.save()
+                    continue
+                raise EOLException(f'Resultados para o código: {responsavel.codigo_eol_aluno} vazios')
+            else:
+                raise EOLException(f'Código EOL não existe')
