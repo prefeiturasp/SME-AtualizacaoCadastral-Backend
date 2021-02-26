@@ -286,24 +286,23 @@ class EOLService(object):
         log.info(f"Quantidade de responsáveis a serem atualizados {len(responsaveis)}.")
         for responsavel in responsaveis.all():
             log.info(f"Atualizando dados do código eol {responsavel.codigo_eol_aluno}.")
-            response = requests.get(f'{DJANGO_EOL_API_URL}/responsaveis/{responsavel.codigo_eol_aluno}',
-                                    headers=cls.DEFAULT_HEADERS,
-                                    timeout=cls.DEFAULT_TIMEOUT)
-            if response.status_code == status.HTTP_200_OK:
-                results = response.json()['results']
-                if len(results) == 1:
-                    if len(results[0]['responsaveis']) == 1 and results[0]['responsaveis'][0]['dt_nascimento_responsavel']:
-                        data = datetime.datetime.strptime(results[0]['responsaveis'][0]['dt_nascimento_responsavel'], "%Y-%m-%dT%H:%M:%S")
-                        results[0]['responsaveis'][0]['dt_nascimento_responsavel'] = data.strftime("%Y-%m-%d")
-                    
-                    data_nascimento_responsavel = datetime.datetime.strptime(results[0]['responsaveis'][0][
-                        'dt_nascimento_responsavel'].strip(), '%Y-%m-%d') if results[0]['responsaveis'][0][
-                        'dt_nascimento_responsavel']  else None
-                    nome_mae = results[0]['responsaveis'][0]['nm_mae_responsavel'].strip() if results[0].get('responsaveis') and results[0]['responsaveis'][0]['nm_mae_responsavel'].strip() else None
-                    responsavel.nome_mae = nome_mae
-                    responsavel.data_nascimento = data_nascimento_responsavel
-                    responsavel.save()
-                    continue
-                raise EOLException(f'Resultados para o código: {responsavel.codigo_eol_aluno} vazios')
-            else:
-                raise EOLException(f'Código EOL não existe')
+            try:
+                response = requests.get(f'{DJANGO_EOL_API_URL}/responsaveis/{responsavel.codigo_eol_aluno}',
+                                        headers=cls.DEFAULT_HEADERS,
+                                        timeout=cls.DEFAULT_TIMEOUT)
+                if response.status_code == status.HTTP_200_OK:
+                    results = response.json()['results']
+                    if len(results) == 1:
+                        if len(results[0]['responsaveis']) == 1 and results[0]['responsaveis'][0]['dt_nascimento_responsavel']:
+                            data = datetime.datetime.strptime(results[0]['responsaveis'][0]['dt_nascimento_responsavel'], "%Y-%m-%dT%H:%M:%S")
+                            results[0]['responsaveis'][0]['dt_nascimento_responsavel'] = data.strftime("%Y-%m-%d")
+
+                        data_nascimento_responsavel = datetime.datetime.strptime(results[0]['responsaveis'][0][
+                            'dt_nascimento_responsavel'].strip(), '%Y-%m-%d') if results[0]['responsaveis'][0][
+                            'dt_nascimento_responsavel']  else None
+                        nome_mae = results[0]['responsaveis'][0]['nm_mae_responsavel'].strip() if results[0].get('responsaveis') and results[0]['responsaveis'][0]['nm_mae_responsavel'] else None
+                        responsavel.nome_mae = nome_mae
+                        responsavel.data_nascimento = data_nascimento_responsavel
+                        responsavel.save()
+            except Exception as e:
+                log.info(f'Erro ao atualizar para o código: {responsavel.codigo_eol_aluno}. Erro {str(e)}')
