@@ -30,3 +30,15 @@ def atualizar_responsavel_no_eol(codigo_eol_aluno, vinculo, nome, cpf, ddd_celul
         nome_mae=nome_mae,
         data_nascimento=data_nascimento
     )
+
+
+@shared_task(
+    autoretry_for=(TimeoutError,),
+    retry_backoff=2,
+    retry_kwargs={'max_retries': 8},
+)
+def atualizar_nome_mae_data_nascimento_responsavel():
+    from ..eol_servico.utils import EOLService
+
+    log.info(f'Chamada do metodo para atualizacao no eol')
+    EOLService.atualiza_dados_responsavel_sem_nome_mae_ou_sem_data_nascimento()
