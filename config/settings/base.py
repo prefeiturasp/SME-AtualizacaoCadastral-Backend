@@ -94,6 +94,7 @@ LOCAL_APPS = [
     "sme_atualizacao_cadastral_apps.users.apps.UsersConfig",
     "sme_atualizacao_cadastral_apps.core.apps.CoreConfig",
     "sme_atualizacao_cadastral_apps.alunos.apps.AlunosConfig",
+    "sme_atualizacao_cadastral_apps.cadastros.apps.CadastrosConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
