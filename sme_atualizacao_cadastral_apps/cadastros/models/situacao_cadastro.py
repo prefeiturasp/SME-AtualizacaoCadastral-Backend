@@ -4,8 +4,9 @@ from django.db import models
 class PlanilhaSituacao(models.Model):
     arquivo = models.FileField(
         'Planilha', upload_to='situacao_cadastro/planilhas',
-        help_text='Deve-se importar um arquivo no formato <strong>.xls</strong> com duas colunas. Sendo '
-                  '<strong>CD_CPF_RESPONSAVEL e MSG</strong>'
+        help_text='Arquivo no formato <strong>.xlsx</strong> com duas colunas, sendo os seguintes titulos:'
+                  '<strong>CD_CPF_RESPONSAVEL e MSG</strong> | A primeira coluna deve conter apenas os números do CPF '
+                  'e a segunda coluna apenas o número da situação'
     )
     data_corte_planilha = models.DateField('Data de corte da planilha')
     data_corte_lote = models.DateField('Data de corte do lote')
@@ -18,6 +19,10 @@ class PlanilhaSituacao(models.Model):
 
     def __str__(self):
         return f'{self.arquivo.name.split("/")[-1]}'
+
+    def processar_planilha(self):
+        from sme_atualizacao_cadastral_apps.cadastros.services.import_xlsx import import_xlsx
+        import_xlsx(self)
 
 
 class BaseCadastro(models.Model):
