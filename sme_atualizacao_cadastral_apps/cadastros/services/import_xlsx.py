@@ -5,7 +5,7 @@ from sme_atualizacao_cadastral_apps.cadastros.models import BaseCadastro
 
 def import_xlsx(planilha):
     if planilha.extraido:
-        # TODO: Definir exception
+        # TODO: Guardar exceção no log quando estiver criado
         pass
     filepath = planilha.arquivo.path
     wb = load_workbook(filepath)
@@ -31,5 +31,5 @@ def import_xlsx(planilha):
             planilha.extraido = True
             planilha.save()
     except ValueError:
-        # TODO: Definir retorno para este erro
+        # TODO: Guardar exceção no log quando estiver criado
         pass
