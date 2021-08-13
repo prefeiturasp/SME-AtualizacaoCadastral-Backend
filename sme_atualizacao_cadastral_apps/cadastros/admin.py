@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 
-from .models import BaseCadastro, PlanilhaSituacao
+from .models import BaseCadastro, LogProcessamentoPlanilha, PlanilhaSituacao
 
 
 @admin.register(PlanilhaSituacao)
@@ -20,3 +20,10 @@ class PlanilhaSituacaoAdmin(admin.ModelAdmin):
 class BaseCadastroAdmin(admin.ModelAdmin):
     list_display = ('cpf', 'situacao')
     readonly_fields = ('cpf', 'situacao')
+
+
+@admin.register(LogProcessamentoPlanilha)
+class LogProcessamentoPlanilhaAdmin(admin.ModelAdmin):
+
+    list_display = ('arquivo', 'criado_em', 'status')
+    readonly_fields = ('arquivo', 'criado_em', 'status', 'msg_retorno')
