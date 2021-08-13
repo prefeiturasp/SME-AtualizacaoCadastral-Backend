@@ -56,3 +56,18 @@ class BaseCadastro(models.Model):
 
     def __str__(self):
         return f'{self.cpf} - {self.get_situacao_display()}'
+
+
+class LogProcessamentoPlanilha(models.Model):
+    arquivo = models.CharField('Nome do arquivo', null=True, max_length=255)
+    criado_em = models.DateTimeField("Criado em", editable=False, auto_now_add=True)
+    status = models.BooleanField('Status', default=False, editable=False)
+    msg_retorno = models.TextField('Mensagem')
+
+    class Meta:
+        verbose_name = 'Log de processamento'
+        verbose_name_plural = 'Logs de processamento'
+
+    def __str__(self):
+        status = 'ok' if self.status else 'falha'
+        return f'{self.arquivo} - {status}'
