@@ -7,12 +7,6 @@ from sme_atualizacao_cadastral_apps.cadastros.models import BaseCadastro
 
 def import_xlsx(planilha):
     nome_arquivo = str(planilha.arquivo.name.split("/")[-1])
-    if planilha.extraido:
-        salvar_log(
-            arquivo=nome_arquivo,
-            status=False,
-            msg_retorno='Esse registro já foi processdo anteriormente.'
-        )
     filepath = planilha.arquivo.path
     wb = load_workbook(filepath)
     ws = wb.worksheets[0]
