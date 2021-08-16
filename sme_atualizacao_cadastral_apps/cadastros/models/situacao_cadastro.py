@@ -21,8 +21,17 @@ class PlanilhaSituacao(models.Model):
         return f'{self.arquivo.name.split("/")[-1]}'
 
     def processar_planilha(self):
-        from sme_atualizacao_cadastral_apps.cadastros.services.import_xlsx import import_xlsx
-        import_xlsx(self)
+        from sme_atualizacao_cadastral_apps.cadastros.tasks import processar_nova_base
+        from sme_atualizacao_cadastral_apps.cadastros.helpers import salvar_log
+
+        if not self.extraido:
+            processar_nova_base.delay(planilha_id=self.id)
+        else:
+            salvar_log(
+                arquivo=str(self.arquivo.name.split("/")[-1]),
+                status=False,
+                msg_retorno='Esse registro já foi processdo anteriormente.'
+            )
 
 
 class BaseCadastro(models.Model):
